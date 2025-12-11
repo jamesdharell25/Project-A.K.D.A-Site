@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project A.K.D.A. — Demo</title>
+
+  <!-- Tailwind Play CDN (good for demos & GitHub Pages) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* small helper for safe-area on some browsers */
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
+
+  <div id="root"></div>
+
+  <!-- React + ReactDOM (UMD) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel for JSX in-browser (only for demo / GitHub Pages) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- App (JSX) -->
+  <script type="text/babel">
+  const { useState, useEffect } = React;
+
+  // --- MOCK DATA & TRANSLATIONS ---
+  const TRANSLATIONS = {
+    en: {
+      app_name: "Project A.K.D.A.",
+      full_name: "Accessible Knowledge for the Development of All",
+      welcome: "Welcome to A.K.D.A.",
+      selectRole: "Select your role to begin",
+      roles: {
+        learner: "I am a Learner",
+        mentor: "I am a Parent/Teacher",
+        advocate: "I am a Volunteer"
+      },
+      nav: { home: "Home", library: "Library", profile: "Profile", community: "Community" },
+      library: { title: "Knowledge Hub", subtitle: "Download resources for offline learning", readBtn: "Study Now", downloadBtn: "Save", downloaded: "Saved" },
+      mentor: { title: "Mentor Dashboard", progress: "Learner Progress", resources: "Teaching Toolkit", seminar: "Training Modules" },
+      advocate: { title: "Advocate Hub", missions: "Outreach Missions", donate: "Book Drive" },
+      offline_alert: "You are currently offline. Accessing saved A.K.D.A. resources."
+    },
+    ph: {
+      app_name: "Proyekto A.K.D.A.",
+      full_name: "Abot-kayang Kaalaman para sa Pag-unlad ng Lahat",
+      welcome: "Maligayang Pagdating",
+      selectRole: "Pumili ng role upang magsimula",
+      roles: { learner: "Ako ay Estudyante", mentor: "Ako ay Magulang/Guro", advocate: "Ako ay Volunteer" },
+      nav: { home: "Home", library: "Aklatan", profile: "Profile", community: "Komunidad" },
+      library: { title: "Sentro ng Kaalaman", subtitle: "I-download para mabasa kahit walang internet", readBtn: "Mag-aral", downloadBtn: "I-save", downloaded: "Naka-save" },
+      mentor: { title: "Mentor Dashboard", progress: "Progreso ng Bata", resources: "Kagamitan sa Pagtuturo", seminar: "Pagsasanay" },
+      advocate: { title: "Advocate Hub", missions: "Misyon ng Volunteer", donate: "Donasyon ng Libro" },
+      offline_alert: "Ikaw ay offline. Gamit ang naka-save na A.K.D.A. resources."
+    }
+  };
+
+  const BOOKS_DATA = [
+    { id: 1, title: "Si Pagong at si Matsing", category: "Fable", stars: 50, color: "bg-blue-100 border-blue-300" },
+    { id: 2, title: "The Legend of Mayon", category: "Folklore", stars: 100, color: "bg-red-100 border-red-300" },
+    { id: 3, title: "Basic Math: Geometry", category: "Mathematics", stars: 75, color: "bg-yellow-100 border-yellow-300" },
+    { id: 4, title: "Science: Photosynthesis", category: "Science", stars: 80, color: "bg-emerald-100 border-emerald-300" },
+    { id: 5, title: "Civics: Karapatang Pambata", category: "Social Studies", stars: 60, color: "bg-blue-50 border-blue-200" },
+  ];
+
+  // Updated: include formUrl for each mission (user-provided link)
+  const VOLUNTEER_MISSIONS = [
+    { id: 1, title: "Reading Camp @ Sitio Bakal", date: "Dec 10, 2025", slots: "2/5 filled", dist: "3km away", formUrl: "https://forms.gle/nyzAZUFWt8Wa9zQU7" },
+    { id: 2, title: "Math Tutoring Session", date: "Dec 12, 2025", slots: "Open", dist: "5km away", formUrl: "https://forms.gle/nyzAZUFWt8Wa9zQU7" },
+    { id: 3, title: "Module Distribution", date: "Dec 15, 2025", slots: "Full", dist: "1km away", formUrl: "https://forms.gle/nyzAZUFWt8Wa9zQU7" },
+  ];
+
+  // --- Book content: 3-5 detailed paragraphs per book ---
+  const BOOK_CONTENT = {
+    1: `Si Pagong at si Matsing is a classic Filipino fable that teaches lessons about humility, fairness, and cleverness. The story centers on two friends — a slow but steady turtle (Pagong) and a clever but selfish monkey (Matsing). They find a banana tree together and decide to share the fruits, but Matsing insists on dividing the tree so he can benefit more, leading to a series of events that test their friendship.
+
+The fable highlights how greed and trickery often backfire. Matsing’s cunning plans to outsmart Pagong initially seem to give him an advantage, but the story demonstrates that patience, honesty, and persistence ultimately win. The narrative also provides cultural context: it reflects rural life, communal values, and the use of humor to teach moral lessons.
+
+For learners, this tale offers opportunities to discuss character traits and consequences. Teachers can ask students to identify moments where Pagong shows resilience and where Matsing’s choices create conflict. Activities might include role-play, story mapping, and rewriting the ending to imagine a fairer resolution.
+
+Finally, beyond the moral lesson, the story is a window into Philippine folklore—its animal symbolism, oral storytelling traditions, and the way communities pass values across generations. Reading and discussing the fable supports empathy and critical thinking as students examine motives and outcomes.`,
+
+    2: `The Legend of Mayon is a well-known lore from the Bicol region that explains the origin of Mount Mayon and its perfect cone shape. The legend often centers on a beautiful maiden named Daragang Magayon and her tragic love story. Her name, which means "beautiful maiden," and the volcano's shape became intertwined with themes of love, loss, and the power of nature.
+
+These kinds of legends blend historical memory with imaginative storytelling. While not literal history, they convey the emotional truth of a community — why a place is held sacred, how natural features are explained, and how local identity is reinforced. Asking learners to compare the legend with geological facts about volcanos can spark interdisciplinary thinking.
+
+Teachers can use the legend to introduce topics such as cultural heritage, the role of myths in shaping place identity, and the difference between folklore and scientific explanation. Classroom activities may include creating a timeline of the legend, mapping Bicol’s geography, or writing a modern retelling of the tale.
+
+The legend also provides a chance to discuss how stories change over time and how they are used to teach values: courage, loyalty, and respect for nature. Engaging with such folklore helps students appreciate the diversity of Philippine cultural expressions and strengthens community connections through shared narratives.`,
+
+    3: `Basic Math: Geometry introduces learners to shapes, sizes, and the relationships between points, lines, and angles. Geometry begins with simple definitions — points as locations, lines as infinite straight paths, and planes as two-dimensional surfaces. Understanding these basic elements is crucial because they form the language used to describe more complex constructions like polygons and circles.
+
+A strong focus in early geometry is on measurement and reasoning. Students learn to calculate perimeter and area for common shapes (rectangles, triangles, circles) and to apply formulas in problem-solving contexts. Geometry is practical: it explains the design of everyday objects, the layout of rooms, and the basics needed for fields like engineering and architecture.
+
+Another key skill is spatial reasoning: visualizing how shapes change under rotation, reflection, and scaling. Exercises that involve drawing, cutting paper shapes, and using simple geometry tools help learners build intuition. Activities that connect geometry to art (e.g., tessellations) foster creativity while reinforcing concepts.
+
+Finally, geometry emphasizes proofs and logical argumentation as students progress. Starting with informal justification in early grades, they gradually build toward formal proofs: explaining why a property holds, not just that it does. This develops mathematical thinking and the ability to communicate precise ideas.`,
+
+    4: `Science: Photosynthesis explains how plants convert light energy into chemical energy, producing the oxygen we breathe and the carbohydrates that feed ecosystems. At its core, photosynthesis takes place in chloroplasts within plant cells, where chlorophyll pigments capture sunlight. These pigments absorb photons and initiate a chain of reactions that split water molecules and fix carbon dioxide into sugars.
+
+The process has two main stages: the light-dependent reactions and the Calvin cycle (light-independent reactions). In the light-dependent phase, sunlight drives the production of ATP and NADPH while releasing oxygen as a by-product. During the Calvin cycle, the plant uses ATP and NADPH to convert CO2 into glucose and other carbohydrates that serve as energy stores.
+
+Learning about photosynthesis connects molecular biology to real-world topics such as food chains, agriculture, and climate change. For instance, understanding how increased CO2 levels or shading affect photosynthetic rates helps explain crop yields and ecosystem dynamics. Classroom labs can include experiments measuring oxygen output or observing how light intensity affects plant growth.
+
+Teaching photosynthesis also offers opportunities for cross-curricular projects: exploring the chemistry of reactions, the physics of light, and the environmental implications of plant productivity. Emphasizing the central role of photosynthesis reinforces the idea that plants are foundational to life on Earth.`,
+
+    5: `Civics: Karapatang Pambata (Children's Rights) introduces learners to basic human rights specifically focused on children’s welfare and protection. The module explains key rights such as the right to education, protection from harm, access to healthcare, and the importance of being heard in matters that affect a child. These principles are rooted in the UN Convention on the Rights of the Child and national laws that protect minors.
+
+This topic helps students understand the responsibilities of families, schools, and governments in ensuring children's rights. Practical examples might include discussing what safe learning environments look like, how communities can support children's health, and what mechanisms exist for reporting abuse or neglect. Case studies and role-playing can help make abstract rights tangible.
+
+An important component is teaching children about participation and agency: how they can voice concerns, participate in school councils, or contribute to community decisions in age-appropriate ways. Empowering children with knowledge about their rights builds confidence and civic responsibility.
+
+Finally, examining children's rights is an invitation to discuss fairness, equity, and social support systems. It encourages learners to think critically about what a just society provides for its youngest members and how citizens can advocate for better welfare and inclusive policies.`,
+  };
+
+  // --- Small components ---
+  const TopBar = ({ lang, setLang, isOffline, setIsOffline, userRole, goBack, t }) => (
+    <div className="bg-white shadow-sm px-4 py-3 flex justify-between items-center sticky top-0 z-50 border-b border-blue-100">
+      <div className="flex items-center gap-2">
+        {userRole && (
+          <button onClick={goBack} className="mr-1 p-1 hover:bg-gray-100 rounded-full">
+            <span aria-hidden className="text-xl">⬅️</span>
+          </button>
+        )}
+
+        <div className="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center">
+          {/* Top-left logo: replace with your image file (place logo.png next to index.html) */}
+          <img src="./logo.png" alt="AKDA logo" className="w-6 h-6 object-contain" />
+        </div>
+        <span className="font-bold text-blue-900 text-lg hidden sm:block tracking-tight">{t.app_name}</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button onClick={() => setIsOffline(!isOffline)} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors ${isOffline ? 'bg-slate-200 text-slate-600' : 'bg-blue-100 text-blue-800'}`}>
+          <span aria-hidden className="text-sm">{isOffline ? '📡' : '📶'}</span>
+          {isOffline ? 'Offline' : 'Online'}
+        </button>
+
+        <button onClick={() => setLang(lang === 'en' ? 'ph' : 'en')} className="flex items-center gap-1 px-2 py-1 hover:bg-slate-100 rounded-md text-sm font-semibold text-slate-600">
+          <span aria-hidden className="text-sm">🌐</span>
+          {lang.toUpperCase()}
+        </button>
+      </div>
+    </div>
+  );
+
+  const OfflineBanner = ({ t }) => (
+    <div className="bg-slate-800 text-white text-xs py-2 px-4 text-center flex items-center justify-center gap-2">
+      <span aria-hidden>📡</span>
+      {t.offline_alert}
+    </div>
+  );
+
+  const RoleCard = ({ icon, title, subtitle, onClick, color, iconColor }) => (
+    <button onClick={onClick} className={`w-full text-left p-6 rounded-2xl border-2 ${color} transition-all transform hover:scale-[1.02] active:scale-95 shadow-sm hover:shadow-md flex items-center gap-4 mb-4 bg-white`}>
+      <div className={`w-14 h-14 rounded-full flex items-center justify-center`}> {icon} </div>
+      <div>
+        <h3 className="font-bold text-lg text-slate-800">{title}</h3>
+        <p className="text-sm text-slate-500">{subtitle}</p>
+      </div>
+      <div className="ml-auto text-slate-400">›</div>
+    </button>
+  );
+
+  // --- Dashboards ---
+  function LearnerDashboard({ t, isOffline }) {
+    const [downloaded, setDownloaded] = useState([1,3]);
+    const [stars, setStars] = useState(350);
+    const [reading, setReading] = useState(null);
+
+    const toggleDownload = (id) => {
+      if (isOffline) return;
+      if (downloaded.includes(id)) setDownloaded(prev => prev.filter(d=>d!==id));
+      else setDownloaded(prev=>[...prev,id]);
+    };
+
+    const handleRead = (book) => {
+      if (isOffline && !downloaded.includes(book.id)) return;
+      setReading(book);
+      setTimeout(()=>{ setStars(s=>s+10); }, 5000);
+    };
+
+    if (reading) {
+      const content = BOOK_CONTENT[reading.id] || "Content not available.";
+      const paragraphs = content.split('\n\n');
+
+      return (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col animate-in slide-in-from-right duration-300">
+          <div className="p-4 border-b flex items-center justify-between bg-slate-50">
+            <button onClick={() => setReading(null)} className="flex items-center gap-2 text-slate-600 font-medium"><span aria-hidden>⬅️</span> Back</button>
+            <span className="font-bold text-slate-800 truncate max-w-[200px]">{reading.title}</span>
+            <div className="w-8" />
+          </div>
+          <div className="flex-1 p-8 overflow-y-auto bg-[#fdfbf7] font-serif text-lg leading-relaxed text-slate-800">
+            <div className="max-w-2xl mx-auto">
+              <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">{reading.title}</h1>
+              <div className="w-full h-64 bg-slate-200 rounded-xl mb-8 flex items-center justify-center text-slate-400">
+                {/* Placeholder for cover image or illustration */}
+                <span aria-hidden className="text-6xl">📖</span>
+              </div>
+
+              {paragraphs.map((p, idx) => (
+                <p key={idx} className="mb-4">{p}</p>
+              ))}
+
+              <p className="italic text-slate-500 text-center mt-10">... Content loaded from A.K.D.A. knowledge hub ...</p>
+            </div>
+          </div>
+          <div className="p-4 border-t bg-white flex justify-center">
+             <button className="bg-blue-700 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-blue-800 transition flex items-center gap-2">Next Chapter ›</button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="pb-24">
+        <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-6 rounded-b-[2.5rem] shadow-lg mb-6 relative overflow-hidden">
+          <div className="relative z-10 flex justify-between items-center">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Knowledge Points</p>
+              <h2 className="text-4xl font-black flex items-center gap-2">{stars.toLocaleString()} <span className="text-yellow-400">⭐</span></h2>
+            </div>
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border-2 border-yellow-400 shadow-md"><span className="font-bold text-xl text-blue-800">JD</span></div>
+          </div>
+        </div>
+
+        <div className="px-4">
+          <h3 className="font-bold text-xl text-slate-800 mb-1">{t.library.title}</h3>
+          <p className="text-slate-500 text-sm mb-4">{t.library.subtitle}</p>
+
+          <div className="grid gap-4">
+            {BOOKS_DATA.map(book => {
+              const isDownloaded = downloaded.includes(book.id);
+              const isAvailable = !isOffline || isDownloaded;
+              return (
+                <div key={book.id} className={`relative p-4 rounded-xl border ${isAvailable ? book.color : 'bg-gray-100 border-gray-200 opacity-70'} flex gap-4 transition-all`}>
+                  <div className={`w-20 h-28 rounded-lg shadow-sm flex-shrink-0 flex items-center justify-center ${isAvailable ? 'bg-white' : 'bg-gray-300'}`}>
+                    <span aria-hidden>📚</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider opacity-60">{book.category}</span>
+                      <h4 className="font-bold text-slate-800 leading-tight mb-1">{book.title}</h4>
+                      <div className="flex items-center gap-1 text-yellow-600 text-xs font-bold">⭐ +{book.stars} pts</div>
+                    </div>
+
+                    <div className="flex gap-2 mt-3">
+                      <button onClick={() => handleRead(book)} disabled={!isAvailable} className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold text-center ${isAvailable ? 'bg-slate-800 text-white shadow-md hover:bg-slate-900' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>{t.library.readBtn}</button>
+                      <button onClick={() => toggleDownload(book.id)} disabled={isOffline} className={`p-2 rounded-lg border transition-colors ${isDownloaded ? 'bg-emerald-100 border-emerald-200 text-emerald-600' : isOffline ? 'border-gray-300 text-gray-400' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>{isDownloaded ? '✓' : '⬇️'}</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function MentorDashboard({ t }) {
+    return (
+      <div className="pb-24 px-4">
+        <div className="mt-6 mb-8">
+          <h2 className="text-2xl font-bold text-slate-800">{t.mentor.title}</h2>
+          <p className="text-slate-500">Monitor development and access resources.</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-slate-700 flex items-center gap-2">🏅 {t.mentor.progress}</h3>
+            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">Juan Dela Cruz</span>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1"><span className="text-slate-600">Reading Comprehension</span><span className="font-bold text-slate-800">85%</span></div>
+              <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-red-500 h-2 rounded-full" style={{width:'85%'}}></div></div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1"><span className="text-slate-600">Vocabulary</span><span className="font-bold text-slate-800">70%</span></div>
+              <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full" style={{width:'70%'}}></div></div>
+            </div>
+          </div>
+        </div>
+
+        <h3 className="font-bold text-lg text-slate-800 mb-3">{t.mentor.resources}</h3>
+        <div className="space-y-3">
+          {['Guide: Teaching Reading at Home', 'Math Manipulatives (Printable)', 'Child Psychology Basics'].map((item, idx) => (
+            <div key={idx} className="bg-white p-4 rounded-lg border border-slate-200 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer group">
+              <div className="flex items-center gap-3"><div className="bg-yellow-100 p-2 rounded-md text-yellow-700 group-hover:bg-yellow-200">📄</div><span className="text-slate-700 font-medium">{item}</span></div>
+              <div>⬇️</div>
+            </div>
+          ))}
+        </div>
+
+        <h3 className="font-bold text-lg text-slate-800 mt-6 mb-3">{t.mentor.seminar}</h3>
+        <div className="bg-blue-900 text-white rounded-xl p-4 flex gap-4 items-center"><div className="bg-white/10 p-3 rounded-full">▶️</div><div><h4 className="font-bold">Community Education 101</h4><p className="text-blue-200 text-sm">Video Module • 45 mins</p></div></div>
+      </div>
+    );
+  }
+
+  function AdvocateDashboard({ t }) {
+    return (
+      <div className="pb-24 px-4">
+        <div className="mt-6 mb-6"><h2 className="text-2xl font-bold text-slate-800">{t.advocate.title}</h2><p className="text-slate-500">Mobilize for the community.</p></div>
+
+        <div className="grid grid-cols-2 gap-4 mb-8"><div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center"><h3 className="text-3xl font-black text-blue-700">12</h3><p className="text-xs text-blue-800 font-medium uppercase">Hours Volunteered</p></div><div className="bg-red-50 p-4 rounded-xl border border-red-100 text-center"><h3 className="text-3xl font-black text-red-600">45</h3><p className="text-xs text-red-800 font-medium uppercase">Resources Distributed</p></div></div>
+
+        <h3 className="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">📍 {t.advocate.missions}</h3>
+        <div className="space-y-4">
+          {VOLUNTEER_MISSIONS.map(m => (
+            <div key={m.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+              <div className="flex justify-between items-start mb-2"><h4 className="font-bold text-slate-800">{m.title}</h4><span className="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">{m.dist}</span></div>
+              <div className="flex items-center gap-4 text-sm text-slate-500 mb-4"><span className="flex items-center gap-1">📅 {m.date}</span><span className="flex items-center gap-1">👥 {m.slots}</span></div>
+
+              {/* Anchor that opens Google Form in a new tab (uses formUrl) */}
+              <a href={m.formUrl} target="_blank" rel="noopener noreferrer" className="block text-center w-full bg-slate-800 text-white py-2 rounded-lg font-medium hover:bg-slate-700 transition-colors">Join Mission</a>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 bg-gradient-to-r from-blue-700 to-blue-500 rounded-xl p-6 text-white text-center shadow-lg relative overflow-hidden"><div className="Heart mb-2 animate-bounce relative z-10">❤️</div><h3 className="font-bold text-xl mb-1 relative z-10">{t.advocate.donate}</h3><p className="text-blue-100 text-sm mb-4 relative z-10">Contribute learning materials to the hub.</p><button className="bg-yellow-400 text-blue-900 px-6 py-2 rounded-full font-bold shadow-lg hover:bg-yellow-300 transition relative z-10">Schedule Pickup</button></div>
+      </div>
+    );
+  }
+
+  const Navigation = ({ role, activeTab, setActiveTab, t }) => {
+    const getTabs = () => {
+      switch(role) {
+        case 'learner': return [ { id: 'library', emoji: '📚', label: t.nav.library }, { id: 'rewards', emoji: '⭐', label: 'Rewards' } ];
+        case 'mentor': return [ { id: 'mentor-home', emoji: '👥', label: 'Dashboard' }, { id: 'toolkit', emoji: '📄', label: 'Toolkit' } ];
+        case 'advocate': return [ { id: 'missions', emoji: '📍', label: 'Missions' }, { id: 'donate', emoji: '❤️', label: 'Donate' } ];
+        default: return [];
+      }
+    };
+    const tabs = getTabs();
+    return (
+      <div className="fixed bottom-0 w-full bg-white border-t border-slate-200 px-6 py-3 flex justify-around items-center z-40 pb-safe">
+        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'home' ? 'text-blue-700' : 'text-slate-400'}`}>
+          {/* Navigation logo (small) */}
+          <div className="flex items-center justify-center"><img src="./logo.png" alt="logo" className="w-5 h-5 object-contain" /></div>
+          <span className="text-[10px] font-bold uppercase">{t.nav.home}</span>
+        </button>
+        {tabs.map(tab=> (
+          <button key={tab.id} onClick={()=>setActiveTab(tab.id)} className={`flex flex-col items-center gap-1 transition-colors ${activeTab===tab.id ? 'text-blue-700' : 'text-slate-400'}`}><div>{tab.emoji}</div><span className="text-[10px] font-bold uppercase">{tab.label}</span></button>
+        ))}
+        <button className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600"><div>☰</div><span className="text-[10px] font-bold uppercase">Menu</span></button>
+      </div>
+    );
+  };
+
+  // --- MAIN APP ---
+  function App() {
+    const [lang, setLang] = useState('en');
+    const [userRole, setUserRole] = useState(null);
+    const [activeTab, setActiveTab] = useState('home');
+    const [isOffline, setIsOffline] = useState(false);
+    const t = TRANSLATIONS[lang];
+
+    useEffect(()=>{ setActiveTab('home'); }, [userRole]);
+
+    const renderContent = () => {
+      if (!userRole) {
+        return (
+          <div className="p-6 flex flex-col items-center justify-center min-h-[80vh] animate-in fade-in duration-700">
+            <div className="mb-8 text-center">
+              <div className="w-40 h-40 mx-auto mb-6 relative flex items-center justify-center">
+                 <div className="absolute inset-0 bg-blue-100 rounded-full animate-pulse opacity-50"></div>
+                 {/* Updated: big center logo uses your image file (logo.png) */}
+                 <div className="w-32 h-32 shadow-xl rounded-3xl overflow-hidden transform rotate-6 border-4 border-white z-10 bg-white flex items-center justify-center">
+                   <img src="./logo.png" alt="AKDA logo" className="w-full h-full object-contain" />
+                 </div>
+                 <div className="absolute w-32 h-32 bg-red-500 rounded-3xl shadow-lg transform -rotate-6 opacity-30 z-0"></div>
+              </div>
+
+              <h1 className="text-3xl font-black text-blue-900 mb-2 tracking-tight">{t.app_name}</h1>
+              <p className="text-slate-500 font-medium text-lg leading-tight px-4">{t.full_name}</p>
+            </div>
+
+            <div className="w-full max-w-md space-y-4">
+              <p className="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">{t.selectRole}</p>
+
+              <RoleCard icon={<span className="text-yellow-600">⭐</span>} title={t.roles.learner} subtitle="Access modules & earn knowledge stars" color="border-yellow-300 hover:bg-yellow-50" iconColor="text-yellow-600" onClick={()=>setUserRole('learner')} />
+              <RoleCard icon={<span className="text-red-600">👥</span>} title={t.roles.mentor} subtitle="Track progress & get teaching aids" color="border-red-200 hover:bg-red-50" iconColor="text-red-600" onClick={()=>setUserRole('mentor')} />
+              <RoleCard icon={<span className="text-blue-600">❤️</span>} title={t.roles.advocate} subtitle="Volunteer & support the community" color="border-blue-200 hover:bg-blue-50" iconColor="text-blue-600" onClick={()=>setUserRole('advocate')} />
+            </div>
+
+            <p className="mt-12 text-xs text-slate-300 font-medium">Project A.K.D.A. • 2025 Release</p>
+          </div>
+        );
+      }
+      switch(userRole) {
+        case 'learner': return <LearnerDashboard t={t} isOffline={isOffline} />;
+        case 'mentor': return <MentorDashboard t={t} />;
+        case 'advocate': return <AdvocateDashboard t={t} />;
+        default: return null;
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+        <TopBar lang={lang} setLang={setLang} isOffline={isOffline} setIsOffline={setIsOffline} userRole={userRole} goBack={()=>setUserRole(null)} t={t} />
+        {isOffline && <OfflineBanner t={t} />}
+        <main className="max-w-md mx-auto w-full min-h-screen bg-slate-50 shadow-2xl overflow-hidden relative">{renderContent()}{userRole && <Navigation role={userRole} activeTab={activeTab} setActiveTab={setActiveTab} t={t} />}</main>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>
